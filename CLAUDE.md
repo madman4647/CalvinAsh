@@ -89,7 +89,7 @@ Context for the teardown. Don't port these bugs into the new code.
 ## Progress
 
 - [x] Loop 0 · Foundation and teardown
-- [ ] Loop 1 · Accounts, roles, audit
+- [x] Loop 1 · Accounts, roles, audit
 - [ ] Loop 2 · CCA setup and structure lock
 - [ ] Loop 3 · Applications and ranking
 - [ ] Loop 4 · Panels, groups, queues
