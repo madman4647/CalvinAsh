@@ -22,7 +22,9 @@
     "db:migrate:create": "node-pg-migrate create -m migrations -j sql",
     "db:migrate:test": "node-pg-migrate up -m migrations -j sql --envPath .env -d TEST_DATABASE_URL",
     "db:migrate:test:down": "node-pg-migrate down -m migrations -j sql --envPath .env -d TEST_DATABASE_URL",
+    "db:setup-role": "node scripts/db/setup-app-role.js",
     "seed:selection-day": "node scripts/seed/selection-day.js",
+    "senate:create-account": "node scripts/ops/create-senate-account.js",
     "gate": "node scripts/gate/index.js"
   },
   "devDependencies": {
