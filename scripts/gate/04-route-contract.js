@@ -6,21 +6,26 @@ const { getRegisteredRoutes } = require('../../server/src/lib/routeRegistry');
 const CONTRACT_TEST_DIR = path.resolve(__dirname, '../../server/test/contract');
 
 function slug(route) {
-  return `${route.method}-${route.path}`.replace(/[/:]+/g, '-').replace(/^-+|-+$/g, '');
+  // e.g. { method: 'post', path: '/api/auth/login' } -> 'post-api-auth-login'.
+  // Loop 0 only ever had path: '/', which happened not to expose that
+  // joining "post-" with "/api/..." left a doubled "--" once the "/" itself
+  // got collapsed to "-" (the leading "-" from the join was never touched by
+  // the regex, since "-" isn't in the character class it matches).
+  const cleanPath = route.path.replace(/^\/+/, '').replace(/[/:]+/g, '-').replace(/-+$/, '');
+  return cleanPath ? `${route.method}-${cleanPath}` : route.method;
 }
 
 /**
- * Every data-changing route must declare a permission + auditEvent (enforced at
- * registration time by routeRegistry.defineRoute) AND have a contract test at
- * server/test/contract/<method>-<path>.test.js that asserts a wrong role is
- * refused and that an audit row is written. Loop 0 registers zero data-changing
- * routes, so this passes now with nothing to enforce - but Loop 1's first POST
- * route is forced through this exact check.
+ * Every data-changing route must declare a permission + auditEvent (enforced
+ * at registration time by routeRegistry.defineRoute) AND have a contract
+ * test at server/test/contract/<method>-<path>.test.js that calls the shared
+ * helper (server/test/contract/routeContractHelper.js) instead of asserting
+ * this freehand - expectRouteContract() for a role-restricted route,
+ * expectPublicRouteAudit() for a 'public' one. This replaces Loop 0's loose
+ * /refus/i and /audit/i text-matching, which a contract test could satisfy
+ * just by mentioning those words in a comment.
  */
 module.exports = async function routeContractCheck() {
-  // Routes register themselves once, at module require-time (see
-  // routeRegistry.js) - calling createApp() here just guarantees that has
-  // happened before we read the registry.
   createApp();
   const routes = getRegisteredRoutes();
   const dataChanging = routes.filter((r) => r.dataChanging);
@@ -35,12 +40,13 @@ module.exports = async function routeContractCheck() {
       problems.push(`${route.method.toUpperCase()} ${route.path}: no contract test at server/test/contract/${slug(route)}.test.js`);
       continue;
     }
+
     const content = fs.readFileSync(testFile, 'utf8');
-    if (!/refus/i.test(content)) {
-      problems.push(`${route.method.toUpperCase()} ${route.path}: contract test doesn't assert a wrong-role refusal`);
-    }
-    if (!/audit/i.test(content)) {
-      problems.push(`${route.method.toUpperCase()} ${route.path}: contract test doesn't assert an audit row is written`);
+    const requiredHelper = route.permission === 'public' ? 'expectPublicRouteAudit' : 'expectRouteContract';
+    if (!new RegExp(`${requiredHelper}\\s*\\(`).test(content)) {
+      problems.push(
+        `${route.method.toUpperCase()} ${route.path}: contract test doesn't call the shared ${requiredHelper}() helper`,
+      );
     }
   }
 
@@ -49,6 +55,6 @@ module.exports = async function routeContractCheck() {
   }
   return {
     passed: true,
-    summary: `${routes.length} route(s) registered, ${dataChanging.length} data-changing, all have permission+audit contract tests`,
+    summary: `${routes.length} route(s) registered, ${dataChanging.length} data-changing, all have permission+audit contract tests using the shared helper`,
   };
 };
