@@ -14,7 +14,8 @@ CREATE TABLE students (
 CREATE TABLE ccas (
   account_id uuid PRIMARY KEY REFERENCES accounts(id),
   name text NOT NULL,
-  type text NOT NULL CHECK (type IN ('committee', 'club', 'aig'))
+  type text NOT NULL CHECK (type IN ('committee', 'club', 'aig')),
+  email text NOT NULL
 );
 
 -- "A panelist is a person" - one profile row per panelist account, even
