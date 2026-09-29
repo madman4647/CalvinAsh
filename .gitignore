@@ -1,9 +1,10 @@
 node_modules/
 .env
 dist/
-server/uploads/resumes/*
-server/uploads/presentations/*
-!server/uploads/resumes/.gitkeep
-!server/uploads/presentations/.gitkeep
+build/
 *.log
 .DS_Store
+coverage/
+playwright-report/
+test-results/
+gate-report.json
