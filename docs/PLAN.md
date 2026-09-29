@@ -2,7 +2,7 @@
 
 Snapshot of the Claude doc as of 29 Sep 2026. The live doc is the source of truth for product decisions: https://claude.ai/code/artifact/d8be380f-774d-42ec-87a2-6b123addf110 (private until shared). If a decision changes there, update this file before building against it.
 
-Both non-negotiables become backend state machines. The task queue shows each panelist one submission and serves the next only after its marks lock. The interview session admits only the next student in the panel's schedule, and it holds the panel until the panel exits after locking marks. All twenty-two decisions (D1–D14 and N1–N8) are applied throughout. We build in 12 loops (0–11). A loop closes only when the full regression gate passes: every earlier loop's tests and invariants, not just the new ones.
+Both non-negotiables become backend state machines. The task queue shows each panelist one submission and serves the next only after its marks lock. The interview session admits only the next student in the panel's schedule, and it holds the panel until the panel exits after locking marks. All twenty-five decisions (D1–D14 and N1–N11) are applied throughout. We build in 12 loops (0–11). A loop closes only when the full regression gate passes: every earlier loop's tests and invariants, not just the new ones.
 
 ## What the PRDs settle
 
@@ -178,7 +178,7 @@ The PRD's closing ask is that three things be impossible, not merely forbidden: 
 
 ## Decisions
 
-All twenty-two decisions are settled and applied throughout. D1–D14 came from the PRD gaps; N1–N8 are follow-ups raised along the way.
+All twenty-five decisions are settled and applied throughout. D1–D14 came from the PRD gaps; N1–N11 are follow-ups raised along the way.
 
 | ID | Question | Decision | Built in loop | Status |
 | --- | --- | --- | --- | --- |
@@ -207,6 +207,9 @@ All twenty-two decisions are settled and applied throughout. D1–D14 came from 
 | N6 | Repair the old app or rebuild it? | Rebuild on the same stack (React + Vite + Tailwind, Express, PostgreSQL). The client is rebuilt from scratch and the database starts from fresh migrations; old code is kept only where it fits cleanly (email and Excel helpers). Still one loop at a time through the gate, and each loop's features work end to end | 0 | Decided |
 | N7 | UI direction | `docs/UI-UX.md`: a comic-notebook look with original art only; playful for students, calm for panelists and Senate; fixed plain labels for every critical action. PLAN wins on behaviour | 0 onward | Decided |
 | N8 | Questions at application time | Keep up to 10 questions per CCA, answered when applying and editable until the application close, then frozen. The CCA's optional PDF resume requirement stays. Common questions and the general resume are removed. Answers and resumes follow the same access rule as task files (NN-T8) | 2, 3 | Decided |
+| N9 | Login and password reset | Login ID + password. Nobody ever receives a password by email. New accounts and resets get a one-time, expiring set-password link. The reset response is identical whether or not the ID exists, and reset requests are rate-limited. The accounts model stays open to adding institute SSO later | 1 | Decided |
+| N10 | Account creation | The first Senate account comes from a CLI/seed command, never the web. Senate creates student accounts (CSV import: login ID, name, email, batch) and CCA accounts. Each CCA account adds its own panelists. Everyone gets their set-password link through the bulk mail | 1 | Decided |
+| N11 | Sessions | httpOnly, Secure, SameSite cookies backed by a server-side sessions table, not tokens in localStorage, so Loop 11's idle logout and revocation need no rework | 1 | Decided |
 
 ## Execution plan
 
