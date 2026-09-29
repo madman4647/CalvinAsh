@@ -137,7 +137,7 @@ Section names below are ours. Each loop styles its own screens with these compon
 
 - **Login, "The Wagon Ride":** a red-wagon doodle and "Hop in" copy. The page shows nothing about admin areas. [Loop 1]
 - **Browse CCAs, "The Galaxy":** each CCA is a planet card with its name, type, verticals and seats, rounds and key dates, over faint space doodles. [Loop 3]
-- **Apply, "The Box":** a cardboard-box styled form (CCA, then vertical). The button must still say Apply; a flourish like "Zap! Apply" is fine. [Loop 3]
+- **Apply, "The Box":** a cardboard-box styled form: CCA, then vertical, then the CCA's questions (up to 10), then a resume upload if the CCA requires one. Show a clear "You can edit these answers until {application close}" line. The button must still say Apply; a flourish like "Zap! Apply" is fine. [Loop 3]
 - **My applications and ranking:** a drag-and-drop list styled as sticky notes. The application close date sits at the top in plain words. After the close, show a lock icon and "Frozen". [Loop 3]
 - **Rounds, "Case Files":** each round is a notepad page with instructions, due time, hard close, and an upload box that shows the exact submission receipt (§15). For interview rounds, it shows the slot and the live queue position ("You are 3rd in line", "You're next"). [Loops 6–7]
 - **Interview:** a full-screen `StateBanner` with three states: waiting, "You are currently in an interview" (§18), and "Interview completed". There is one very large button per state (ENTER INTERVIEW, then EXIT INTERVIEW), plus a reminder to press EXIT when the interview ends. [Loop 7]
@@ -146,7 +146,7 @@ Section names below are ours. Each loop styles its own screens with these compon
 
 ### CCA account ("CCA HQ", medium theme)
 
-- **Structure builder:** step by step (verticals → rounds → panels) with a live summary card. FINALIZE SELECTION STRUCTURE shows the §8 confirmation text before it runs. [Loop 2]
+- **Structure builder:** step by step (verticals → application questions and resume option → rounds → panels) with a live summary card. The questions lock when applications open. FINALIZE SELECTION STRUCTURE shows the §8 confirmation text before it runs. [Loop 2]
 - **Panels, groups and schedules:** drag-and-drop lanes per panel. Once a round opens, everything shows as locked. [Loop 4]
 - **Round control:** Start evaluation, hard-close extension (later times only), progress counts ("32 of 40 evaluated"). The ranking view shows order and tie groups, never marks. The elimination picker offers only valid counts, with the minimum pool shown prominently. [Loops 6–8]
 

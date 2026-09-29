@@ -44,6 +44,7 @@ Every rule below is enforced in the backend or the database. Hiding a button is 
 **Task evaluation (Non-negotiable A)**
 - The server serves exactly one submission to each panelist (one per panel in single-score mode). It serves the next only after that one is locked. There is no list, search, preview, skip or client-chosen order. Order is random, seeded per round, and the seed is audited.
 - A submission file streams only to its own student, its current assignee, the panel of an ACTIVE interview session, or Senate. There are no public or guessable URLs, and the static `/uploads` route is never reused for submissions.
+- A student's application answers and resume follow the same rule: a panel sees them only alongside that student's current assignment or active interview (N8).
 - Evaluation starts only after the hard close has passed and the CCA presses Start evaluation. The hard close moves only later, and only before Start evaluation.
 - A panelist who cannot evaluate parks the submission with a reason, which alerts Senate. Open assignments are never released automatically.
 
@@ -73,7 +74,7 @@ Context for the teardown. Don't port these bugs into the new code.
 - The frontend does not match the backend. Of the 38 distinct endpoints the client calls, 24 don't exist on the server, and most of the rest return different field names (the client expects Mongo-style `_id`, `status` and camelCase). The server sends errors as `{ error }`; the client reads `message`.
 - The bcrypt hash in `database/seed.sql` does not match the documented password `calvin123`.
 - Forgot password: the client sends `pgpId`, the server expects `pgpid`.
-- Council common questions insert into a column `text` that doesn't exist (it is `question_text`).
+- Council common questions insert into a column `text` that doesn't exist (it is `question_text`). Common questions and the general resume are dropped (N8); per-CCA questions (up to 10) and the optional per-CCA resume are kept and rebuilt in Loops 2–3.
 - Admin settings: the server returns rows; the client expects an object with different key names.
 - A resume upload overwrites the file on disk before the deadline check runs.
 - Withdrawing and re-applying to the same CCA fails with a 500 (unique constraint).
@@ -84,10 +85,6 @@ Context for the teardown. Don't port these bugs into the new code.
 - Hostel nominations are dropped entirely (N5). Delete `HostelDashboard`, `HostelApplyPage`, the `/student/hostel/*` routes and nav links, `getHostelCCAs`, `applyToHostel`, and the hostel type, seed row and `max_hostel_applications` setting. Don't rebuild any of it.
 - Applications use one Senate-set close for every CCA (N4); there is no per-CCA application deadline.
 - `MIGRATION_SPEC.md` and `MIGRATION_SPECv2.0.md` describe the old port from PHP. They are history, not requirements; PLAN.md and the PRD replace them.
-
-## Open item
-
-- N8: drop application-time questions (the old per-CCA questions, common questions and general resume)? Recommended: drop; a CCA uses a Round 1 task instead. Needed before Loop 3; Loop 0 deletes the old code either way, since nothing is ported as is.
 
 ## Progress
 
