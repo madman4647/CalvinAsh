@@ -2,16 +2,18 @@
 
 Calvin is IIM Lucknow's CCA selection platform. Students apply to Committees, Clubs and AIGs; CCAs run selection rounds (tasks and interviews) through panels of their members; Senate monitors everything and runs the final allocation. We are rebuilding it so that evaluation is fair, blind and auditable.
 
-**Source of truth: `docs/PLAN.md`.** It holds the rules (NN-T*, NN-I*), edge cases, decisions (D1–D14, N1–N5), the 12 loops, the loop gate and the 21 invariants (INV-01 to INV-21). Read the sections relevant to your task before writing code.
+**Source of truth: `docs/PLAN.md`.** It holds the rules (NN-T*, NN-I*), edge cases, decisions (D1–D14, N1–N8), the 12 loops, the loop gate and the 21 invariants (INV-01 to INV-21). Read the sections relevant to your task before writing code.
+
+**UI: `docs/UI-UX.md`.** It governs look, tone, layout and wording: tokens, components, motion, screen-by-screen notes and the fixed labels for critical actions. PLAN.md wins on behaviour.
 
 The Senate's requirements are in `docs/prd/`: `production-document.md` (the PRD; § numbers in PLAN.md refer to it) and `prd-gaps-corrected.md` (answers on ties, panel scoring, verticals, screening and final allocation). Where PLAN.md records a decision, PLAN.md wins; where PLAN.md is silent, follow the PRD and ask if it is ambiguous.
 
-## Stack and commands
+## Stack
 
-- Client: React 18 + Vite + Tailwind in `client/` (`npm run dev`, port 3000, proxies `/api` to port 5000).
-- Server: Node/Express + `pg` in `server/` (`npm run dev`, port 5000).
-- Database: PostgreSQL 15+. Today: `database/schema.sql`, `seed.sql`, `migrate-v1-to-v2.sql`. From Loop 0 on, every schema change is a migration with a working down step.
-- Loop 0 must add: a test stack (Vitest, Supertest against a real Postgres in Docker, Playwright), CI, and one command, `npm run gate`, that runs the whole loop gate (PLAN.md → The loop gate).
+- Client: React 18 + Vite + Tailwind in `client/`. Server: Node/Express + `pg` in `server/`. Database: PostgreSQL 15+.
+- The app is being rebuilt on this same stack (N6). Change the stack only for a strong reason, and ask first.
+- Loop 0 creates the fresh skeleton, a migration tool with a fresh baseline schema, the test stack (Vitest, Supertest against a real Postgres in Docker, Playwright), CI, and one command, `npm run gate`, that runs the whole loop gate (PLAN.md → The loop gate). After Loop 0, every schema change is a migration with a working down step.
+- Until Loop 0 lands, the old app's commands still apply: `npm run dev` in `client/` (port 3000, proxies `/api` to 5000) and in `server/` (port 5000). Loop 0 rewrites the README for the new setup.
 
 ## How to work
 
@@ -21,6 +23,8 @@ The Senate's requirements are in `docs/prd/`: `production-document.md` (the PRD;
 4. Stop rule: a bug in an earlier loop's area gets a failing test first, then the fix.
 5. Don't invent policy. If a requirement is missing, ambiguous or conflicts with PLAN.md, stop and ask, then record the answer in PLAN.md → Decisions.
 6. When a loop closes, tick it in Progress below and write a short report in `docs/loops/loop-N.md`: what changed, which shared components it touched, and the gate results.
+7. Teardown is allowed (N6). Rebuild the client from scratch and start the database from fresh migrations. Port old code only where it fits cleanly (the email and Excel helpers). Delete old screens and code as their replacements land, and leave no dead code behind. It is still one loop at a time through the gate, never one big rewrite, and each loop ends with its own features working end to end.
+8. Screens follow `docs/UI-UX.md`: use its components, never theme the fixed labels, and use the PRD messages word for word.
 
 ## Non-negotiables
 
@@ -62,9 +66,9 @@ Every rule below is enforced in the backend or the database. Hiding a button is 
 - Every route that changes data declares its permission and has two tests: a wrong role is refused, and an audit row is written. The route contract test enforces this.
 - Every invariant in PLAN.md gets an automated check (SQL assertion or property test) in the loop that introduces it. That check runs in every later gate and is never removed.
 
-## Known state of the codebase
+## The old codebase
 
-Fix these in Loop 0 unless another loop is named.
+Context for the teardown. Don't port these bugs into the new code.
 
 - The frontend does not match the backend. Of the 38 distinct endpoints the client calls, 24 don't exist on the server, and most of the rest return different field names (the client expects Mongo-style `_id`, `status` and camelCase). The server sends errors as `{ error }`; the client reads `message`.
 - The bcrypt hash in `database/seed.sql` does not match the documented password `calvin123`.
@@ -73,16 +77,21 @@ Fix these in Loop 0 unless another loop is named.
 - Admin settings: the server returns rows; the client expects an object with different key names.
 - A resume upload overwrites the file on disk before the deadline check runs.
 - Withdrawing and re-applying to the same CCA fails with a 500 (unique constraint).
-- `/uploads/resumes` checks login but not role (Loop 1).
-- Role is guessed from the login ID prefix (Loop 1 replaces this).
-- The legacy allocation in `server/src/services/allocation.service.js` is replaced in Loop 10. Legacy select/waitlist screens go behind a flag in Loop 0.
-- Hostel nominations are removed entirely in Loop 0 (N5). That covers `HostelDashboard` and `HostelApplyPage`, the `/student/hostel/*` routes and nav links, `getHostelCCAs` and `applyToHostel`, the hostel filters in `getCCAs` and `getApplications`, the `hostel` value in the committees type check (by migration), the `hostel1` seed row and the `max_hostel_applications` setting.
-- Applications use one Senate-set close for every CCA (N4, Loop 3). The per-CCA `deadline` field is retired for applications.
-- Vite runs on port 3000; the README says 5173.
+- `/uploads/resumes` checks login but not role.
+- Forgot password resets any student's password instantly, knowing only their ID.
+- Role is guessed from the login ID prefix.
+- The legacy allocation (`server/src/services/allocation.service.js`) and the select/waitlist model are superseded by PLAN.md; delete them in Loop 0.
+- Hostel nominations are dropped entirely (N5). Delete `HostelDashboard`, `HostelApplyPage`, the `/student/hostel/*` routes and nav links, `getHostelCCAs`, `applyToHostel`, and the hostel type, seed row and `max_hostel_applications` setting. Don't rebuild any of it.
+- Applications use one Senate-set close for every CCA (N4); there is no per-CCA application deadline.
+- `MIGRATION_SPEC.md` and `MIGRATION_SPECv2.0.md` describe the old port from PHP. They are history, not requirements; PLAN.md and the PRD replace them.
+
+## Open item
+
+- N8: drop application-time questions (the old per-CCA questions, common questions and general resume)? Recommended: drop; a CCA uses a Round 1 task instead. Needed before Loop 3; Loop 0 deletes the old code either way, since nothing is ported as is.
 
 ## Progress
 
-- [ ] Loop 0 · Baseline and safety net
+- [ ] Loop 0 · Foundation and teardown
 - [ ] Loop 1 · Accounts, roles, audit
 - [ ] Loop 2 · CCA setup and structure lock
 - [ ] Loop 3 · Applications and ranking
