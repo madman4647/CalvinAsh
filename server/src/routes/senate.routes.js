@@ -15,7 +15,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 *
 // batch - re-running an import to add more students is a normal workflow.
 defineRoute(
   router,
-  { method: 'post', path: '/students/import', permission: 'senate', dataChanging: true, auditEvent: 'students.imported' },
+  { method: 'post', path: '/api/senate/students/import', permission: 'senate', dataChanging: true, auditEvent: 'students.imported' },
   upload.single('file'),
   async (req, res, next) => {
     try {
@@ -76,7 +76,7 @@ defineRoute(
   },
 );
 
-defineRoute(router, { method: 'get', path: '/ccas', permission: 'senate' }, async (req, res, next) => {
+defineRoute(router, { method: 'get', path: '/api/senate/ccas', permission: 'senate' }, async (req, res, next) => {
   try {
     const result = await query('SELECT account_id, name, type, email FROM ccas ORDER BY name');
     res.json(pickFields(result.rows, ['account_id', 'name', 'type', 'email']));
@@ -85,7 +85,7 @@ defineRoute(router, { method: 'get', path: '/ccas', permission: 'senate' }, asyn
   }
 });
 
-defineRoute(router, { method: 'post', path: '/ccas', permission: 'senate', dataChanging: true, auditEvent: 'cca.created' }, async (req, res, next) => {
+defineRoute(router, { method: 'post', path: '/api/senate/ccas', permission: 'senate', dataChanging: true, auditEvent: 'cca.created' }, async (req, res, next) => {
   try {
     const { loginId, name, type, email } = req.body || {};
     if (!loginId || !name || !type || !email) {

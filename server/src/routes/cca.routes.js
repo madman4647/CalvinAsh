@@ -7,7 +7,7 @@ const { issueSetPasswordToken } = require('./auth.routes');
 
 const router = express.Router();
 
-defineRoute(router, { method: 'get', path: '/panelists', permission: 'cca' }, async (req, res, next) => {
+defineRoute(router, { method: 'get', path: '/api/cca/panelists', permission: 'cca' }, async (req, res, next) => {
   try {
     const result = await query(
       `SELECT p.account_id, p.name, p.email
@@ -26,7 +26,7 @@ defineRoute(router, { method: 'get', path: '/panelists', permission: 'cca' }, as
 // D3: the CCA account adds its own panelists. A senior already panelling for
 // another CCA is matched by login ID and simply linked via cca_members,
 // rather than erroring or creating a second account for the same person.
-defineRoute(router, { method: 'post', path: '/panelists', permission: 'cca', dataChanging: true, auditEvent: 'panelist.added' }, async (req, res, next) => {
+defineRoute(router, { method: 'post', path: '/api/cca/panelists', permission: 'cca', dataChanging: true, auditEvent: 'panelist.added' }, async (req, res, next) => {
   try {
     const { loginId, name, email } = req.body || {};
     if (!loginId) {

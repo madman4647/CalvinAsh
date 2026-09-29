@@ -13,10 +13,13 @@ function createApp() {
   app.use(express.json());
   app.use(cookieParser());
 
-  app.use('/api/health', healthRoutes);
-  app.use('/api/auth', authRoutes);
-  app.use('/api/senate', senateRoutes);
-  app.use('/api/cca', ccaRoutes);
+  // Every route registers its own full path via defineRoute (see
+  // routeRegistry.js), so registry.path is always the real URL - gate checks
+  // 3/4/5 rely on that to hit routes directly. Mount at root, not a prefix.
+  app.use(healthRoutes);
+  app.use(authRoutes);
+  app.use(senateRoutes);
+  app.use(ccaRoutes);
 
   app.use((req, res) => {
     res.status(404).json({ error: 'Not found' });

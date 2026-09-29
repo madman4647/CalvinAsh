@@ -52,7 +52,7 @@ async function issueSetPasswordToken(client, accountId, { isReset }) {
   return rawToken;
 }
 
-defineRoute(router, { method: 'post', path: '/login', permission: 'public', dataChanging: true, auditEvent: 'login.succeeded' }, async (req, res, next) => {
+defineRoute(router, { method: 'post', path: '/api/auth/login', permission: 'public', dataChanging: true, auditEvent: 'login.succeeded' }, async (req, res, next) => {
   try {
     const { loginId, password } = req.body || {};
     if (!loginId || !password) {
@@ -89,7 +89,7 @@ defineRoute(router, { method: 'post', path: '/login', permission: 'public', data
   }
 });
 
-defineRoute(router, { method: 'post', path: '/logout', permission: ALL_ROLES, dataChanging: true, auditEvent: 'logout' }, async (req, res, next) => {
+defineRoute(router, { method: 'post', path: '/api/auth/logout', permission: ALL_ROLES, dataChanging: true, auditEvent: 'logout' }, async (req, res, next) => {
   try {
     await withTransaction(async (client) => {
       await revokeSession(client, req.sessionToken);
@@ -109,7 +109,7 @@ defineRoute(router, { method: 'post', path: '/logout', permission: ALL_ROLES, da
 
 // N9: the response is identical whether or not the login ID exists, and
 // requests are rate-limited without revealing that they were.
-defineRoute(router, { method: 'post', path: '/forgot-password', permission: 'public', dataChanging: true, auditEvent: 'password_reset.requested' }, async (req, res, next) => {
+defineRoute(router, { method: 'post', path: '/api/auth/forgot-password', permission: 'public', dataChanging: true, auditEvent: 'password_reset.requested' }, async (req, res, next) => {
   try {
     const { loginId } = req.body || {};
     const genericBody = { message: 'If that login ID exists, we have sent a link to set a new password.' };
@@ -144,7 +144,7 @@ defineRoute(router, { method: 'post', path: '/forgot-password', permission: 'pub
   }
 });
 
-defineRoute(router, { method: 'post', path: '/set-password', permission: 'public', dataChanging: true, auditEvent: 'password.set' }, async (req, res, next) => {
+defineRoute(router, { method: 'post', path: '/api/auth/set-password', permission: 'public', dataChanging: true, auditEvent: 'password.set' }, async (req, res, next) => {
   try {
     const { token, password } = req.body || {};
     if (!token || !password || password.length < 8) {
@@ -183,7 +183,7 @@ defineRoute(router, { method: 'post', path: '/set-password', permission: 'public
   }
 });
 
-defineRoute(router, { method: 'get', path: '/me', permission: ALL_ROLES }, (req, res) => {
+defineRoute(router, { method: 'get', path: '/api/auth/me', permission: ALL_ROLES }, (req, res) => {
   res.json({ loginId: req.account.loginId, role: req.account.role });
 });
 
