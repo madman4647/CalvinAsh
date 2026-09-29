@@ -60,8 +60,12 @@ defineRoute(router, { method: 'post', path: '/api/auth/login', permission: 'publ
     }
 
     const result = await withTransaction(async (client) => {
+      // No FOR UPDATE here: login doesn't transition the account row itself
+      // (it inserts a session + audit row), and locking it for the duration
+      // of the audit trigger's advisory lock is exactly what deadlocks two
+      // concurrent logins to the same account against each other.
       const accountResult = await client.query(
-        'SELECT id, password_hash, role, status FROM accounts WHERE login_id = $1 FOR UPDATE',
+        'SELECT id, password_hash, role, status FROM accounts WHERE login_id = $1',
         [loginId],
       );
       const account = accountResult.rows[0];
