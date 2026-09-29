@@ -1,8 +1,11 @@
-require('dotenv').config();
-const app = require('./app');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-const PORT = process.env.PORT || 5000;
+const { createApp } = require('./app');
 
-app.listen(PORT, () => {
-  console.log(`Calvin server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+const port = process.env.PORT || 5000;
+const app = createApp();
+
+app.listen(port, () => {
+  console.log(`Calvin server listening on port ${port}`);
 });
