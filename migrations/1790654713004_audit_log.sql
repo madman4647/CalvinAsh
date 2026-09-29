@@ -28,8 +28,15 @@ CREATE FUNCTION audit_row_hash(
   );
 $$ LANGUAGE sql IMMUTABLE;
 
+-- id is NOT a serial/identity column on purpose: nextval() for a serial
+-- default is handed out before this table's BEFORE INSERT trigger even
+-- starts, uncoordinated with the advisory lock below - two concurrent
+-- inserts can be assigned ids 3 and 4 in that order, yet the transaction
+-- that got id 4 can reach (and release) the lock first, chaining id 3 off
+-- id 4's hash. id must be assigned *inside* the locked section instead, so
+-- id order and chain order can never diverge.
 CREATE TABLE audit_log (
-  id bigserial PRIMARY KEY,
+  id bigint PRIMARY KEY,
   occurred_at timestamptz NOT NULL DEFAULT now(),
   actor_account_id uuid REFERENCES accounts(id),
   event_type text NOT NULL,
@@ -40,16 +47,19 @@ CREATE TABLE audit_log (
   hash text NOT NULL
 );
 
--- The app supplies event_type/actor/entity/details only - prev_hash and hash
--- are always computed here, so the app (even with a bug) cannot forge them.
--- The advisory lock serializes concurrent writers so two transactions can
--- never both chain off the same "previous" row.
+-- The app supplies event_type/actor/entity/details only - id, prev_hash and
+-- hash are always computed here, so the app (even with a bug) cannot forge
+-- them. The advisory lock serializes concurrent writers so id assignment and
+-- hash chaining happen as one atomic step - two transactions can never both
+-- chain off the same "previous" row, or race each other for the next id.
 CREATE FUNCTION audit_log_chain_trigger() RETURNS trigger AS $$
 DECLARE
+  last_id bigint;
   last_hash text;
 BEGIN
   PERFORM pg_advisory_xact_lock(hashtext('audit_log_chain'));
-  SELECT hash INTO last_hash FROM audit_log ORDER BY id DESC LIMIT 1;
+  SELECT id, hash INTO last_id, last_hash FROM audit_log ORDER BY id DESC LIMIT 1;
+  NEW.id := COALESCE(last_id, 0) + 1;
   NEW.prev_hash := last_hash;
   NEW.hash := audit_row_hash(last_hash, NEW.event_type, NEW.actor_account_id, NEW.entity_type, NEW.entity_id, NEW.details, NEW.occurred_at);
   RETURN NEW;

@@ -13,25 +13,29 @@ async function schemaSnapshot(client) {
 }
 
 /**
- * Loop 0 is the first loop, so there is no previous loop's database to diff
- * against. Instead: migrate up from empty, run the invariants, migrate down,
- * migrate up again, and assert the schema is identical to the first up. This
- * exercises the real up/down/up mechanism now so Loop 1 can point it at a real
- * prior-loop snapshot without changing how the check itself works.
+ * Migrates up, seeds the real selection-day fixtures, runs the invariants,
+ * then migrates all the way down and back up, comparing schemas. Seeding
+ * before the down/up cycle (rather than Loop 0's empty-schema round-trip)
+ * proves the down migrations tear down a genuinely populated database
+ * cleanly - FK/ordering bugs an empty schema can't surface - not that data
+ * survives the round-trip, which down migrations are never meant to do.
  */
 module.exports = async function migrationRoundTrip() {
   const up1 = run('npm', ['run', 'db:migrate:test']);
   if (up1.code !== 0) return { passed: false, summary: 'migrate up failed' };
 
+  const seed = run('npm', ['run', 'seed:selection-day']);
+  if (seed.code !== 0) return { passed: false, summary: 'selection-day seed failed before the round-trip' };
+
   const invariantResult = await invariantCheck();
   if (!invariantResult.passed) {
-    return { passed: false, summary: `invariants failed after migrate up: ${invariantResult.summary}` };
+    return { passed: false, summary: `invariants failed after migrate up + seed: ${invariantResult.summary}` };
   }
 
   const afterUp = await withClient(schemaSnapshot);
 
-  const down = run('npm', ['run', 'db:migrate:test:down']);
-  if (down.code !== 0) return { passed: false, summary: 'migrate down failed' };
+  const down = run('npm', ['run', 'db:migrate:test:down:all']);
+  if (down.code !== 0) return { passed: false, summary: 'migrate down (populated schema) failed' };
 
   const up2 = run('npm', ['run', 'db:migrate:test']);
   if (up2.code !== 0) return { passed: false, summary: 'second migrate up failed' };
@@ -41,5 +45,5 @@ module.exports = async function migrationRoundTrip() {
   if (afterUp !== afterUp2) {
     return { passed: false, summary: 'schema after up -> down -> up does not match the schema after the first up' };
   }
-  return { passed: true, summary: 'migrate up -> down -> up round-tripped to an identical schema' };
+  return { passed: true, summary: 'migrate up -> seed -> down (all) -> up round-tripped a populated schema to an identical shape' };
 };

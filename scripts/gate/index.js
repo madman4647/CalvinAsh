@@ -1,7 +1,13 @@
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-process.env.NODE_ENV = process.env.NODE_ENV || 'test';
+// Unconditional, not `||=`: .env sets NODE_ENV=development for `npm run dev`,
+// and dotenv.config() already applied that above (dotenv only skips vars
+// that are set *before* it runs) - `process.env.NODE_ENV || 'test'` would
+// therefore always just re-read "development" and every check that branches
+// on NODE_ENV==='test' (starting with which database server/src/db.js
+// connects to) silently runs against the dev database instead of the test one.
+process.env.NODE_ENV = 'test';
 
 const { run } = require('./lib/exec');
 
@@ -21,6 +27,20 @@ async function main() {
   const migrate = run('npm', ['run', 'db:migrate:test']);
   if (migrate.code !== 0) {
     console.error('Could not migrate the test database. Is `npm run db:up` running?');
+    process.exit(1);
+  }
+
+  console.log('Setting the restricted app role\'s password...');
+  const setupRole = run('npm', ['run', 'db:setup-role']);
+  if (setupRole.code !== 0) {
+    console.error('Could not set up the calvin_app role. Is APP_DB_PASSWORD set in .env?');
+    process.exit(1);
+  }
+
+  console.log('Seeding selection-day fixtures (needed by the regression suite\'s contract tests, and checks 2/3)...');
+  const seed = run('npm', ['run', 'seed:selection-day']);
+  if (seed.code !== 0) {
+    console.error('Could not seed the selection-day fixtures.');
     process.exit(1);
   }
 

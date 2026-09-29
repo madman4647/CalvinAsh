@@ -51,4 +51,10 @@ BEGIN
   EXECUTE format('REVOKE CONNECT ON DATABASE %I FROM calvin_app', current_database());
 END
 $$;
-DROP ROLE IF EXISTS calvin_app;
+
+-- Deliberately does NOT DROP ROLE calvin_app: roles are cluster-wide, not
+-- per-database, and calvin_dev/calvin_test share the same Postgres cluster
+-- (both locally and in CI). Dropping it here would fail as soon as the role
+-- still holds privileges in the other database - Postgres correctly refuses
+-- that - and would silently break the other database's app connection if it
+-- ever somehow succeeded. Down only undoes this database's grants.
