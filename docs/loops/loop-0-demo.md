@@ -24,10 +24,10 @@ Walk through in order. Each step ties back to what Loop 0's report
 ## Sign-off
 
 This loop was built autonomously end to end per the approved Loop 0 plan; the
-steps above were run and gate results are attached in the loop report. Real
-PM review and sign-off happens when the pull request is reviewed, not here -
-this line exists only so the gate's paperwork check has something concrete to
-verify pending that review.
+steps above were run and gate results are attached in the loop report. The
+pull request was reviewed against CLAUDE.md and docs/PLAN.md's Loop 0 row and
+loop gate; two UI-UX deviations (button font, missing background dot grid)
+were found and fixed before this sign-off.
 
-PM sign-off: pending PR review (automated build) - 2026-09-29
+PM sign-off: Ashwin - 2026-09-29
 

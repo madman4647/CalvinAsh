@@ -22,6 +22,8 @@
 
 body {
   background-color: var(--paper);
+  background-image: radial-gradient(#e5e1d8 1px, transparent 1px);
+  background-size: 20px 20px;
   color: var(--ink);
   font-family: 'Nunito', sans-serif;
   font-variant-numeric: tabular-nums;
@@ -53,7 +55,7 @@ h1, h2, h3, h4, .font-heading {
     border: 3px solid var(--ink);
     border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px;
     box-shadow: 4px 4px 0 var(--ink);
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Comic Neue', cursive;
     font-weight: 700;
     transition: transform 150ms ease, box-shadow 150ms ease;
   }
