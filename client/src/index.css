@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ch-paper: #FFF8E7;
+  --ch-ink: #1A1A1A;
+  --ch-red: #CC2200;
+  --ch-gold: #D4890A;
+  --ch-sky: #5B8FD6;
+  --ch-grass: #5C8A3C;
+}
+
+@layer base {
+  body {
+    @apply antialiased;
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--ch-paper);
+    color: var(--ch-ink);
+  }
+
+  h1 {
+    font-family: 'Bangers', cursive;
+    @apply text-4xl tracking-wide;
+    color: var(--ch-red);
+  }
+
+  h2 {
+    font-family: 'Bangers', cursive;
+    @apply text-2xl tracking-wide;
+    color: var(--ch-ink);
+  }
+
+  h3 {
+    @apply text-lg font-bold;
+    color: var(--ch-ink);
+  }
+}
+
+@layer components {
+  /* Comic panel card */
+  .comic-card {
+    background: #ffffff;
+    border: 2px solid var(--ch-ink);
+    box-shadow: 3px 3px 0 var(--ch-ink);
+    border-radius: 4px;
+    padding: 1.25rem;
+  }
+
+  .comic-card:hover {
+    box-shadow: 5px 5px 0 var(--ch-ink);
+    transform: translate(-1px, -1px);
+    transition: all 0.15s ease;
+  }
+
+  /* Primary Calvin button */
+  .btn-calvin {
+    background-color: var(--ch-red);
+    color: #ffffff;
+    border: 2px solid var(--ch-ink);
+    box-shadow: 3px 3px 0 var(--ch-ink);
+    padding: 0.5rem 1.25rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 3px;
+    transition: all 0.12s ease;
+  }
+
+  .btn-calvin:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--ch-ink);
+  }
+
+  .btn-calvin:active:not(:disabled) {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--ch-ink);
+  }
+
+  .btn-calvin:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Outline variant */
+  .btn-calvin-outline {
+    background-color: transparent;
+    color: var(--ch-ink);
+    border: 2px solid var(--ch-ink);
+    box-shadow: 2px 2px 0 var(--ch-ink);
+    padding: 0.5rem 1.25rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 3px;
+    transition: all 0.12s ease;
+  }
+
+  .btn-calvin-outline:hover:not(:disabled) {
+    background-color: var(--ch-ink);
+    color: #ffffff;
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ch-ink);
+  }
+
+  .btn-calvin-outline:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Gold / secondary button */
+  .btn-gold {
+    background-color: var(--ch-gold);
+    color: var(--ch-ink);
+    border: 2px solid var(--ch-ink);
+    box-shadow: 3px 3px 0 var(--ch-ink);
+    padding: 0.5rem 1.25rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 3px;
+    transition: all 0.12s ease;
+  }
+
+  .btn-gold:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--ch-ink);
+  }
+
+  .btn-gold:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Danger button */
+  .btn-danger-calvin {
+    background-color: #991b1b;
+    color: #ffffff;
+    border: 2px solid var(--ch-ink);
+    box-shadow: 2px 2px 0 var(--ch-ink);
+    padding: 0.5rem 1.25rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 3px;
+    transition: all 0.12s ease;
+  }
+
+  .btn-danger-calvin:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ch-ink);
+  }
+
+  .btn-danger-calvin:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Bangers heading */
+  .comic-heading {
+    font-family: 'Bangers', cursive;
+    letter-spacing: 0.05em;
+    color: var(--ch-red);
+  }
+
+  /* Panel label (small caps) */
+  .panel-label {
+    font-variant: small-caps;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--ch-ink);
+    text-transform: uppercase;
+  }
+
+  /* Legacy compat — keep old class names working with new theme */
+  .btn-primary {
+    @apply btn-calvin;
+  }
+
+  .btn-secondary {
+    @apply btn-gold;
+  }
+
+  .btn-outline {
+    @apply btn-calvin-outline;
+  }
+
+  .btn-danger {
+    @apply btn-danger-calvin;
+  }
+
+  .card {
+    @apply comic-card;
+  }
+
+  .input-field {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--ch-ink);
+    border-radius: 3px;
+    outline: none;
+    font-family: 'Nunito', sans-serif;
+    background: #ffffff;
+    transition: box-shadow 0.15s ease;
+  }
+
+  .input-field:focus {
+    box-shadow: 2px 2px 0 var(--ch-sky);
+    border-color: var(--ch-sky);
+  }
+
+  .label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--ch-ink);
+    margin-bottom: 0.25rem;
+  }
+
+  .page-container {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+}
