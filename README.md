@@ -1,137 +1,84 @@
-# Calvin CCA Platform
+# Calvin 2.0
 
-> **"Express your Interests...Online"**  
-> Co-Curricular Activity Selection Platform for IIM Lucknow  
-> Built by Team SynapsE
+Calvin is IIM Lucknow's CCA selection platform. Students apply to Committees,
+Clubs and AIGs; CCAs run selection rounds (tasks and interviews) through
+panels of their members; Senate monitors everything and runs the final
+allocation.
 
-## Overview
+This is a from-scratch rebuild, built one gated loop at a time. See
+[`CLAUDE.md`](CLAUDE.md) for how the project is run loop by loop, and
+[`docs/PLAN.md`](docs/PLAN.md) for the rules, invariants and execution plan
+that is the source of truth for behaviour.
 
-Calvin is a web platform that manages the CCA (Co-Curricular Activity) selection process at IIM Lucknow. Students browse and apply to Committees, Clubs, and AIGs; Committee Heads review applicants; and the Council runs a preference-based matching algorithm.
+## Tech stack
 
-## Tech Stack
+- **Client**: React 18 + Vite + Tailwind CSS (`client/`)
+- **Server**: Node.js + Express + `pg` (`server/`)
+- **Database**: PostgreSQL 15+, migrated with [node-pg-migrate](https://github.com/salsita/node-pg-migrate) (`migrations/`)
+- **Tests**: Vitest + Supertest (server, against a real Postgres), Playwright (end-to-end)
 
-- **Frontend**: React 18 (Vite) + Tailwind CSS
-- **Backend**: Node.js / Express.js
-- **Database**: PostgreSQL 15+
-- **Auth**: JWT + bcrypt
-
-## User Roles
-
-| Role | Login Pattern | Example |
-|---|---|---|
-| Student | Starts with `pgp`, `abm`, or `fpm` | `pgp25001` |
-| Committee Head | Committee alias | `placemen`, `km`, `manfest` |
-| Council / Admin | Fixed IDs | `council`, `admin`, `senate` |
+The repo is an npm workspace (`client`, `server`) so the whole stack installs
+and runs from the root with one command.
 
 ## Prerequisites
 
-- Node.js 18+
-- PostgreSQL 15+
-- npm
+- Node.js 20+
+- Docker (for local Postgres)
 
 ## Setup
 
-### 1. Database
-
 ```bash
-# Create database and user
-psql -U postgres
-CREATE DATABASE calvin;
-CREATE USER calvin_user WITH PASSWORD 'yourpassword';
-GRANT ALL PRIVILEGES ON DATABASE calvin TO calvin_user;
-\q
-
-# Run schema and seed
-psql -U calvin_user -d calvin -f database/schema.sql
-psql -U calvin_user -d calvin -f database/seed.sql
-```
-
-### 2. Backend
-
-```bash
-cd server
 npm install
 cp .env.example .env
-# Edit .env with your DB credentials and JWT secret
-npm start          # production
-# or
-npm run dev        # development (auto-reload)
+npm run db:up        # starts Postgres 15 in Docker
+npm run db:migrate   # applies the baseline schema
+npm run dev          # runs client (:3000) and server (:5000) together
 ```
 
-Server runs on `http://localhost:5000`.
+Open `http://localhost:3000/gallery` to see the base UI component set.
 
-### 3. Frontend
+## Running the tests
 
 ```bash
-cd client
-npm install
-npm run dev
+npm run db:migrate:test   # migrate the test database
+npm test                  # server unit + integration tests (Vitest + Supertest)
+npm run test:e2e          # Playwright end-to-end tests
 ```
 
-Frontend runs on `http://localhost:5173`.
+## The loop gate
 
-## Environment Variables (server/.env)
+Every loop closes only when `npm run gate` passes - the eight checks defined
+in `docs/PLAN.md` → "The loop gate" (regression suite, invariant check,
+mark-leak scan, route contract check, migration round-trip, impact review,
+scripted demo, decision check). It requires a running Postgres (`npm run
+db:up`) and expects `.env` to be present. CI runs the same command against a
+Postgres service container - see `.github/workflows/ci.yml`.
 
-```
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=calvin
-DB_USER=calvin_user
-DB_PASSWORD=yourpassword
-JWT_SECRET=your-secret-key
-JWT_EXPIRES_IN=24h
-PORT=5000
-CLIENT_URL=http://localhost:5173
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
+```bash
+npm run gate
 ```
 
-## Default Credentials (from seed.sql)
-
-All default passwords are `calvin123`.
-
-| Login | Role |
-|---|---|
-| `council` | Council |
-| `admin` | Council |
-| `senate` | Council |
-| `placemen` | Committee (Placement) |
-| `km` | Committee (Knowledge Mgmt) |
-| `manfest` | Club (Manfest) |
-| `literary` | Club (Literary Club) |
-| `financeaig` | AIG (Finance AIG) |
-| `pgp25001` | Student (Test) |
-
-**Change all passwords before going live.**
-
-## Business Rules
-
-- Max **4 applications** per student
-- Student can join a **Committee or AIG** (not both) + up to **2 Clubs**
-- Each committee can have up to **10 custom questions**
-- Applications close at the committee deadline
-- Allocation uses a preference-based stable matching algorithm
-
-## API Reference
-
-| Prefix | Role |
-|---|---|
-| `/api/auth` | Public — login, forgot password |
-| `/api/student` | Students only |
-| `/api/committee` | Committee heads only |
-| `/api/council` | Council/Admin only |
-
-## Project Structure
+## Project structure
 
 ```
-Calvin_2.0/
-├── client/          # React Vite frontend
-├── server/          # Express.js backend
-│   └── uploads/     # Uploaded resumes & presentations
-├── database/
-│   ├── schema.sql   # All table definitions
-│   └── seed.sql     # Initial data + test accounts
-└── .env.example
+calvin/
+├── client/                 # React + Vite + Tailwind app
+│   └── src/components/ui/  # Base components from docs/UI-UX.md
+├── server/                 # Express + pg app
+│   └── src/lib/routeRegistry.js  # Every route's permission/audit contract
+├── migrations/              # node-pg-migrate SQL migrations
+├── invariants/               # One SQL assertion per invariant (INV-01..21)
+├── e2e/                       # Playwright end-to-end tests
+├── scripts/gate/              # The eight loop-gate checks + orchestrator
+├── scripts/seed/               # Fixture seeders used by the gate
+└── docs/
+    ├── PLAN.md              # Source of truth for behaviour
+    ├── UI-UX.md              # Source of truth for look, tone and wording
+    ├── prd/                   # Senate's requirements
+    ├── loops/                  # One report per closed loop
+    └── history/                 # Superseded PHP-era migration notes
 ```
+
+## Progress
+
+See `CLAUDE.md` → Progress for which loops are done.

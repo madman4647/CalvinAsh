@@ -13,7 +13,7 @@ The Senate's requirements are in `docs/prd/`: `production-document.md` (the PRD;
 - Client: React 18 + Vite + Tailwind in `client/`. Server: Node/Express + `pg` in `server/`. Database: PostgreSQL 15+.
 - The app is being rebuilt on this same stack (N6). Change the stack only for a strong reason, and ask first.
 - Loop 0 creates the fresh skeleton, a migration tool with a fresh baseline schema, the test stack (Vitest, Supertest against a real Postgres in Docker, Playwright), CI, and one command, `npm run gate`, that runs the whole loop gate (PLAN.md → The loop gate). After Loop 0, every schema change is a migration with a working down step.
-- Until Loop 0 lands, the old app's commands still apply: `npm run dev` in `client/` (port 3000, proxies `/api` to 5000) and in `server/` (port 5000). Loop 0 rewrites the README for the new setup.
+- Loop 0 has landed: the repo is an npm workspace now. See `README.md` for setup (`npm install`, `npm run db:up`, `npm run db:migrate`, `npm run dev`, `npm run gate`).
 
 ## How to work
 
@@ -88,7 +88,7 @@ Context for the teardown. Don't port these bugs into the new code.
 
 ## Progress
 
-- [ ] Loop 0 · Foundation and teardown
+- [x] Loop 0 · Foundation and teardown
 - [ ] Loop 1 · Accounts, roles, audit
 - [ ] Loop 2 · CCA setup and structure lock
 - [ ] Loop 3 · Applications and ranking
